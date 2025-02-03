@@ -148,6 +148,32 @@ class CityGame:
         if city_input.lower() not in self.cities_set:
             return False
         
+        if self.computer_city and city_input[0].lower() != self.computer_city[-1].lower():
+            return False
+        
+        self.cities_set.remove(city_input.lower())
+        return True
+    
+    def computer_move(self, human_city: str) -> str:
+        """
+        Выполняет ход компьютера
+        """
+        for city in self.cities_set:
+            if city[0].lower() == human_city[-1].lower():
+                if city[-1].lower() in self.bad_letters:
+                    continue
+                self.computer_city = city
+                self.cities_set.remove(city)
+                return ''
+            
+class GameManager:
+    """
+    Класс для управления игрой
+    """
+    def __init__(self, json_file_path: str):
+        self.json_file = JsonFile(json_file_path)
+        self.cities_serializer = CitiesSerializer(self.json_file.read_data())
+        self.city_game = CityGame(self.cities_serializer)
 # # print(bad_letters)
 # print(iter_count)
 

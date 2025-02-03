@@ -103,11 +103,11 @@ class CitiesSerializer:
         for city in city_data:
             city_1 = City(
                 name=city['name'],
-                population=city['population'],
-                subject=city['subject'],
-                district=city['district'],
-                latitude=city['latitude'],
-                longitude=city['longitude'],
+                population=city.get('population', 0),
+                subject=city.get('subject', ''),
+                district=city.get('district', ''),
+                latitude=city.get('latitude', 0.0),
+                longitude=city.get('longitude', 0.0),
                 is_used=False
             )
             self.cities.append(city_1)
@@ -124,7 +124,7 @@ class CityGame:
         for city in self.cities:
             self.cities_set.add(city.name.lower())
         self.computer_city = ''
-        self.bad_letters = self._count_wrong_letters()
+        self.bad_letters = self._count_bad_letters()
 
     def _count_bad_letters(self):
         sym_lower_set = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
@@ -164,7 +164,7 @@ class CityGame:
                     continue
                 self.computer_city = city
                 self.cities_set.remove(city)
-                return ''
+                return city
             
 class GameManager:
     """
@@ -174,51 +174,25 @@ class GameManager:
         self.json_file = JsonFile(json_file_path)
         self.cities_serializer = CitiesSerializer(self.json_file.read_data())
         self.city_game = CityGame(self.cities_serializer)
-# # print(bad_letters)
-# print(iter_count)
 
-# # 3. Мы можем начать писать игру
-# computer_city = ''
-# index = -1
+    def start_game(self):
+        """
+        Начинает игру, включая первый ход компьютера.
+        """
+        while True:
+            human_city = input('Введите город России: ').lower()
 
-# while True:
-#     # Тут 
-#     # Ход человека
-#     human_city = input('Введите город России: ').lower()
-#     # Проверяем, что город есть в сете
-#     if human_city.lower() not in {city.lower() for city in cities_set}:
-#         print('Такого города нет. Человек проиграл.')
-#         break
+            if not self.city_game.human_move(human_city):
+                print('Вы проиграли.')
+                break
 
-#     # Проверяем, что город соотсветствует правилам игры.
-#     # Если компьютер называл город:
-#     if computer_city:
-#         # Проверяем, что город начинается на последнюю букву предыдущего
-#         if human_city[0].lower() != computer_city[-1].lower():
-#             print('Невыполнение правил игры. Человек проиграл.')
-#             break
-    
-#     # Удаляем город из сета
-#     cities_set.remove(human_city)
+            computer_move = self.city_game.computer_move(human_city)
+            if not computer_move:
+                print('Компьютер проиграл.')
+                break
 
-#     # Ход компьютера
+            print(f'Компьютер назвал город: {computer_move}')
 
-#     # Тут мы можем пересчитать "Плохие буквы"
-
-#     # Обходим сет и ищем подходящий город
-#     for city in cities_set:
-#         if city[0].lower() == human_city[-1].lower():
-#             # Проверка на плохие буквы
-#             if city[-1].lower() in bad_letters:
-#                 continue
-#             # Если все хорошо, то запоминаем город
-#             computer_city = city
-#             print('Компьютер назвал город:', computer_city)
-#             # Удаляем город из сета
-#             cities_set.remove(computer_city)
-#             break
-#     else:
-#         print('Компьютер проиграл.')
-#         break
-
-
+if __name__ == "__main__":
+    game_manager = GameManager('cities.json')
+    game_manager.start_game()

@@ -108,34 +108,46 @@ class CitiesSerializer:
                 district=city['district'],
                 latitude=city['latitude'],
                 longitude=city['longitude'],
-                is_used=city['is_used']
+                is_used=False
             )
             self.cities.append(city_1)
+    def get_all_cities(self):
+        return self.cities
     
-   
+class CityGame:
+    """
+    Класс для управления игрой в города
+    """
+    def __init__(self, cities: CitiesSerializer):
+        self.cities = cities.get_all_cities()
+        self.cities_set = set()
+        for city in self.cities:
+            self.cities_set.add(city.name.lower())
+        self.computer_city = ''
+        self.bad_letters = self._count_wrong_letters()
 
-# sym_lower_set = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
+    def _count_bad_letters(self):
+        sym_lower_set = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
+        bad_letters = set()
 
-# # Мы можем перепаковать города в сет
-# cities_set = {city['name'].lower() for city in cities_list}
+        for letter in sym_lower_set:
+            letter_found = False
+            for city_name in self.cities_set:
+                if letter.lower() == city_name[0].lower():
+                    letter_found = True
+                    break
+            if not letter_found:
+                    bad_letters.add(letter)
+        return bad_letters
 
 
-# # Собираем сет "плохих букв"
-# bad_letters = set()
-# iter_count = 0
-# # Внешний цикл для обхода последних букв
-# for letter in sym_lower_set:
-#     # Вложенный цикл для обхода первых букв
-#     for city_2 in cities_set:
-#         first_letter = city_2[0]
-#         iter_count += 1
-#         if letter.lower() == first_letter.lower():
-#            # Что происходит, если они равны? Это хорошая буква
-#            break
-#     else:
-#         # Если мы обошли весь сет и ни одно слово не начинается с нашей буквы - букву заносим как "плохую"
-#         bad_letters.add(letter)
-
+    def human_move(self, city_input: str) -> bool:
+        """
+        Обрабатывает ход человека
+        """
+        if city_input.lower() not in self.cities_set:
+            return False
+        
 # # print(bad_letters)
 # print(iter_count)
 
